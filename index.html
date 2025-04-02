@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIFF Token</title>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        #token { word-break: break-all; padding: 10px; border: 1px solid #ccc; margin-top: 20px; }
+        button { margin-top: 10px; padding: 10px; font-size: 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>LIFF Token</h2>
+    <button onclick="getToken()">ดึง Token</button>
+    <p id="token">กดปุ่มเพื่อดึง Token</p>
+    <button onclick="copyToken()">คัดลอก Token</button>
+
+    <script>
+        function getToken() {
+            liff.init({ liffId: "2007005525-yVvAO6zg" }).then(() => {
+                if (!liff.isLoggedIn()) {
+                    liff.login();
+                } else {
+                    liff.getAccessToken() ? 
+                        document.getElementById("token").innerText = liff.getAccessToken() :
+                        document.getElementById("token").innerText = "ไม่พบ Token";
+                }
+            }).catch(err => console.error("LIFF Error:", err));
+        }
+
+        function copyToken() {
+            const tokenText = document.getElementById("token").innerText;
+            navigator.clipboard.writeText(tokenText).then(() => {
+                alert("คัดลอก Token สำเร็จ!");
+            }).catch(err => console.error("Copy Failed:", err));
+        }
+    </script>
+</body>
+</html>

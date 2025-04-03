@@ -1,59 +1,260 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIFF Token & Auto Message</title>
-    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        #token { word-break: break-all; padding: 10px; border: 1px solid #ccc; margin-top: 20px; }
-        button { margin-top: 10px; padding: 10px; font-size: 16px; cursor: pointer; }
-    </style>
-</head>
-<body>
-    <h2>LIFF Token & Auto Message</h2>
-    <button onclick="getToken()">ดึง Token</button>
-    <p id="token">กำลังโหลด...</p>
-    <button onclick="copyToken()">คัดลอก Token</button>
+<!DOCTYPE html> <!-- ประกาศประเภทเอกสารเป็น HTML5 -->
+<html> <!-- เริ่มต้นแท็ก HTML -->
+<head> <!-- เริ่มต้นส่วนหัวของเอกสาร -->
+    <meta charset="UTF-8"> <!-- กำหนดการเข้ารหัสตัวอักษรเป็น UTF-8 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- กำหนด viewport สำหรับ responsive design -->
+    <title>Share Message</title> <!-- กำหนดชื่อหัวเรื่องของหน้าเว็บ -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet"> <!-- นำเข้า font Kanit จาก Google Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"> <!-- นำเข้า CSS ของ Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet"> <!-- นำเข้า CSS ของ SweetAlert2 -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script> <!-- นำเข้า LIFF SDK จาก LINE -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- นำเข้า JavaScript ของ SweetAlert2 -->
+    <style> <!-- เริ่มต้นส่วนกำหนดสไตล์ CSS -->
+        * { /* เลือกทุก element */
+            font-family: 'Kanit', sans-serif; /* ใช้ font Kanit กับทุก element */
+            transition: all 0.3s ease; /* เพิ่ม transition effect 0.3 วินาที */
+        }
 
-    <script>
-        function sendMessage() {
-            liff.sendMessages([
-                {
-                    type: "text",
-                    text: "กูอยากเลียหี!"
+        body { /* กำหนดสไตล์ให้ body */
+            background: linear-gradient(135deg, #e0f7ff 0%, #f5fdff 100%); /* พื้นหลังแบบ gradient */
+            min-height: 100vh; /* ความสูงขั้นต่ำเต็มหน้าจอ */
+            display: flex; /* ใช้ flexbox */
+            align-items: center; /* จัดกึ่งกลางแนวตั้ง */
+            justify-content: center; /* จัดกึ่งกลางแนวนอน */
+            padding: 20px; /* ระยะห่างภายใน 20px */
+        }
+
+        .card { /* กำหนดสไตล์ให้ class card */
+            background: rgba(255, 255, 255, 0.95); /* พื้นหลังสีขาวโปร่งแสง */
+            border-radius: 15px; /* มุมโค้ง 15px */
+            border: none; /* ไม่มีเส้นขอบ */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05); /* เงา */
+            backdrop-filter: blur(10px); /* เอฟเฟกต์เบลอพื้นหลัง */
+            padding: 30px; /* ระยะห่างภายใน 30px */
+            margin: 20px auto; /* ระยะห่างภายนอกและจัดกึ่งกลาง */
+            max-width: 600px; /* ความกว้างสูงสุด 600px */
+            width: 95%; /* ความกว้าง 95% */
+            animation: fadeIn 0.5s ease-in-out; /* อนิเมชันตอนโหลด */
+        }
+
+        @keyframes fadeIn { /* กำหนด keyframes สำหรับอนิเมชัน fadeIn */
+            from { opacity: 0; transform: translateY(-20px); } /* เริ่มต้นโปร่งใสและเลื่อนขึ้น */
+            to { opacity: 1; transform: translateY(0); } /* สิ้นสุดทึบและตำแหน่งปกติ */
+        }
+
+        .form-control, .btn { /* กำหนดสไตล์ให้ class form-control และ btn */
+            border-radius: 10px; /* มุมโค้ง 10px */
+            padding: 12px 20px; /* ระยะห่างภายใน */
+        }
+
+        .form-control:focus { /* สไตล์เมื่อ form-control ได้ focus */
+            box-shadow: 0 0 0 3px rgba(0, 185, 0, 0.25); /* เงาสีเขียว */
+            border-color: #00B900; /* สีขอบเขียว */
+        }
+
+        textarea.form-control { /* สไตล์ textarea เฉพาะ */
+            min-height: 120px; /* ความสูงขั้นต่ำ 120px */
+        }
+
+        .btn-primary { /* สไตล์ปุ่ม primary */
+            background: #00B900; /* สีพื้นหลังเขียว */
+            border: none; /* ไม่มีเส้นขอบ */
+            font-weight: 500; /* ความหนาของตัวอักษร */
+            padding: 12px 30px; /* ระยะห่างภายใน */
+            color: white; /* สีตัวอักษรขาว */
+        }
+
+        .btn-primary:hover { /* สไตล์เมื่อเมาส์ชี้ปุ่ม primary */
+            background: #009900; /* สีเข้มขึ้น */
+            transform: translateY(-2px); /* เลื่อนขึ้น 2px */
+        }
+
+        .btn-success { /* สไตล์ปุ่ม success */
+            background: #00B900; /* สีพื้นหลังเขียว */
+            border: none; /* ไม่มีเส้นขอบ */
+            font-weight: 500; /* ความหนาของตัวอักษร */
+            color: white; /* สีตัวอักษรขาว */
+        }
+
+        .btn-success:hover { /* สไตล์เมื่อเมาส์ชี้ปุ่ม success */
+            background: #009900; /* สีเข้มขึ้น */
+            transform: translateY(-2px); /* เลื่อนขึ้น 2px */
+        }
+
+        .form-label { /* สไตล์ label */
+            font-weight: 500; /* ความหนาของตัวอักษร */
+            color: #456; /* สีเทาเข้ม */
+            margin-bottom: 8px; /* ระยะห่างด้านล่าง */
+        }
+
+        h2 { /* สไตล์หัวข้อ h2 */
+            color: #345; /* สีเทาเข้ม */
+            font-weight: 600; /* ความหนาของตัวอักษร */
+            margin-bottom: 30px; /* ระยะห่างด้านล่าง */
+        }
+
+        .mb-3 { /* ปรับ margin-bottom */
+            margin-bottom: 20px !important; /* ระยะห่างด้านล่าง 20px */
+        }
+
+        @media (max-width: 768px) { /* สไตล์สำหรับหน้าจอขนาดเล็ก */
+            .card { /* ปรับ card */
+                padding: 20px; /* ระยะห่างภายใน 20px */
+            }
+        }
+
+        .loading { /* สไตล์ตัวโหลด */
+            display: none; /* ซ่อนเริ่มต้น */
+            position: fixed; /* ตำแหน่งคงที่ */
+            top: 0; /* ด้านบนสุด */
+            left: 0; /* ด้านซ้ายสุด */
+            width: 100%; /* ความกว้างเต็ม */
+            height: 100%; /* ความสูงเต็ม */
+            background: rgba(255, 255, 255, 0.8); /* พื้นหลังโปร่งแสง */
+            justify-content: center; /* จัดกึ่งกลางแนวนอน */
+            align-items: center; /* จัดกึ่งกลางแนวตั้ง */
+            z-index: 1000; /* ลำดับชั้นสูง */
+        }
+
+        .loading-spinner { /* สไตล์วงกลมโหลด */
+            border: 4px solid #f3f3f3; /* ขอบสีเทา */
+            border-top: 4px solid #00B900; /* ขอบด้านบนสีเขียว */
+            border-radius: 50%; /* วงกลม */
+            width: 40px; /* ความกว้าง 40px */
+            height: 40px; /* ความสูง 40px */
+            animation: spin 1s linear infinite; /* อนิเมชันหมุน */
+        }
+
+        @keyframes spin { /* กำหนด keyframes สำหรับการหมุน */
+            0% { transform: rotate(0deg); } /* เริ่มต้น 0 องศา */
+            100% { transform: rotate(360deg); } /* สิ้นสุด 360 องศา */
+        }
+    </style> <!-- สิ้นสุดส่วน CSS -->
+</head> <!-- สิ้นสุดส่วนหัว -->
+<body> <!-- เริ่มต้นส่วนเนื้อหา -->
+    <div class="loading" id="loading"> <!-- ตัวโหลด -->
+        <div class="loading-spinner"></div> <!-- วงกลมหมุน -->
+    </div>
+
+    <div class="container"> <!-- คอนเทนเนอร์หลัก -->
+        <div id="loginRequired" style="display: none;"> <!-- ส่วน login เมื่อยังไม่ล็อกอิน -->
+            <div class="card"> <!-- การ์ดสำหรับ login -->
+                <h2 class="text-center">เข้าสู่ระบบ</h2> <!-- หัวข้อ -->
+                <button class="btn btn-success w-100" onclick="liffLogin()">Login with LINE</button> <!-- ปุ่ม login -->
+            </div>
+        </div>
+        
+        <div id="mainContent" style="display: none;"> <!-- ส่วนเนื้อหาหลัก -->
+            <div class="card"> <!-- การ์ดสำหรับเนื้อหา -->
+                <h2 class="text-center">ส่งข้อความ</h2> <!-- หัวข้อ -->
+                
+                <div class="mb-3"> <!-- กลุ่มฟอร์ม Flex Message -->
+                    <label class="form-label">Flex Message JSON:</label> <!-- ป้ายกำกับ -->
+                    <textarea class="form-control" id="flexJson" placeholder="วาง JSON สำหรับ Flex Message ที่นี่"></textarea> <!-- ช่องกรอก JSON -->
+                </div>
+                
+                <div class="mb-3"> <!-- กลุ่มฟอร์มข้อความส่วนหัว -->
+                    <label class="form-label">ข้อความส่วนหัว:</label> <!-- ป้ายกำกับ -->
+                    <input type="text" class="form-control" id="headerText" placeholder="ใส่ข้อความส่วนหัว"> <!-- ช่องกรอกข้อความ -->
+                </div>
+                
+                <div class="mb-3"> <!-- กลุ่มฟอร์มข้อความปกติ -->
+                    <label class="form-label">ข้อความปกติ:</label> <!-- ป้ายกำกับ -->
+                    <input type="text" class="form-control" id="normalText" placeholder="ใส่ข้อความปกติ"> <!-- ช่องกรอกข้อความ -->
+                </div>
+                
+                <button class="btn btn-primary w-100" onclick="shareFlex()">แชร์ข้อความ</button> <!-- ปุ่มแชร์ -->
+            </div>
+        </div>
+    </div>
+
+    <script> <!-- เริ่มต้น JavaScript -->
+        async function initializeLiff() { // ฟังก์ชันเริ่มต้น LIFF
+            try { // เริ่มต้น try-catch เพื่อจัดการข้อผิดพลาด
+                await liff.init({ liffId: "2007005525-yVvAO6zg" }); // เริ่มต้น LIFF ด้วย ID
+                if (liff.isLoggedIn()) { // ตรวจสอบว่าล็อกอินแล้วหรือไม่
+                    document.getElementById('mainContent').style.display = 'block'; // แสดงเนื้อหาหลัก
+                    document.getElementById('loginRequired').style.display = 'none'; // ซ่อนหน้า login
+                } else { // ถ้ายังไม่ล็อกอิน
+                    document.getElementById('mainContent').style.display = 'none'; // ซ่อนเนื้อหาหลัก
+                    document.getElementById('loginRequired').style.display = 'block'; // แสดงหน้า login
                 }
-            ]).then(() => {
-                console.log("ส่งข้อความสำเร็จ");
-            }).catch(err => {
-                console.error("เกิดข้อผิดพลาด:", err);
+            } catch (err) { // จัดการข้อผิดพลาด
+                console.error('LIFF Initialization failed', err); // แสดง error ใน console
+                showAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถเริ่มต้นระบบได้'); // แสดง alert
+            }
+        }
+
+        function liffLogin() { // ฟังก์ชันสำหรับ login
+            if (!liff.isLoggedIn()) { // ถ้ายังไม่ล็อกอิน
+                liff.login(); // เรียกฟังก์ชัน login ของ LIFF
+            }
+        }
+
+        function showAlert(icon, title, text) { // ฟังก์ชันแสดง alert
+            Swal.fire({ // เรียกใช้ SweetAlert2
+                icon: icon, // ไอคอนของ alert
+                title: title, // หัวข้อ
+                text: text, // ข้อความ
+                confirmButtonColor: '#00B900', // สีปุ่มยืนยัน
+                confirmButtonText: 'ตกลง', // ข้อความปุ่มยืนยัน
             });
         }
 
-        function getToken() {
-            liff.init({ liffId: "2007005525-yVvAO6zg" }).then(() => {
-                if (!liff.isLoggedIn()) {
-                    liff.login();
-                } else {
-                    const token = liff.getAccessToken();
-                    document.getElementById("token").innerText = token ? token : "ไม่พบ Token";
+        async function shareFlex() { // ฟังก์ชันแชร์ข้อความ
+            try { // เริ่มต้น try-catch
+                const flexJson = document.getElementById('flexJson').value; // ดึงค่า JSON
+                const headerText = document.getElementById('headerText').value; // ดึงค่าข้อความส่วนหัว
+                const normalText = document.getElementById('normalText').value; // ดึงค่าข้อความปกติ
 
-                    // ส่งข้อความอัตโนมัติ
-                    sendMessage();
+                let messages = []; // อาร์เรย์สำหรับเก็บข้อความ
+
+                // ถ้ามี Flex Message
+                if (flexJson) { // ตรวจสอบว่ามี JSON หรือไม่
+                    try { // เริ่มต้น try-catch สำหรับ parse JSON
+                        const flexObject = JSON.parse(flexJson); // แปลง JSON เป็น object
+                        messages.push({ // เพิ่มข้อความ Flex ลงในอาร์เรย์
+                            type: "flex", // ประเภทข้อความ
+                            altText: headerText || "Flex Message", // ข้อความสำรอง
+                            contents: flexObject // เนื้อหา Flex
+                        });
+                    } catch (e) { // จัดการข้อผิดพลาด JSON
+                        showAlert('error', 'JSON ไม่ถูกต้อง', 'กรุณาตรวจสอบ JSON format'); // แสดง alert
+                        return; // ออกจากฟังก์ชัน
+                    }
                 }
-            }).catch(err => console.error("LIFF Error:", err));
+
+                // ถ้ามีข้อความปกติ
+                if (normalText) { // ตรวจสอบว่ามีข้อความปกติหรือไม่
+                    messages.push({ // เพิ่มข้อความปกติลงในอาร์เรย์
+                        type: "text", // ประเภทข้อความ
+                        text: normalText // เนื้อหาข้อความ
+                    });
+                }
+
+                // ถ้าไม่มีข้อความใดๆ เลย
+                if (messages.length === 0) { // ตรวจสอบว่าอาร์เรย์ว่างหรือไม่
+                    showAlert('warning', 'ไม่พบข้อความ', 'กรุณากรอกข้อความอย่างน้อย 1 ช่อง'); // แสดง alert
+                    return; // ออกจากฟังก์ชัน
+                }
+
+                document.getElementById('loading').style.display = 'flex'; // แสดงตัวโหลด
+                const result = await liff.shareTargetPicker(messages); // ส่งข้อความผ่าน LIFF
+                document.getElementById('loading').style.display = 'none'; // ซ่อนตัวโหลด
+
+                if (result) { // ถ้าส่งสำเร็จ
+                    showAlert('success', 'สำเร็จ', 'ส่งข้อความเรียบร้อยแล้ว'); // แสดง alert ความสำเร็จ
+                } else { // ถ้ายกเลิก
+                    showAlert('info', 'ยกเลิก', 'คุณได้ยกเลิกการส่งข้อความ'); // แสดง alert การยกเลิก
+                }
+            } catch (error) { // จัดการข้อผิดพลาด
+                console.error('Error sharing message:', error); // แสดง error ใน console
+                showAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถส่งข้อความได้'); // แสดง alert
+                document.getElementById('loading').style.display = 'none'; // ซ่อนตัวโหลด
+            }
         }
 
-        function copyToken() {
-            const tokenText = document.getElementById("token").innerText;
-            navigator.clipboard.writeText(tokenText).then(() => {
-                alert("คัดลอก Token สำเร็จ!");
-            }).catch(err => console.error("Copy Failed:", err));
-        }
-
-        // เรียก getToken() ทันทีเมื่อเปิด LIFF
-        getToken();
-    </script>
-</body>
-</html>
+        window.onload = initializeLiff; // เรียก initializeLiff เมื่อหน้าโหลด
+    </script> <!-- สิ้นสุด JavaScript -->
+</body> <!-- สิ้นสุดส่วนเนื้อหา -->
+</html> <!-- สิ้นสุดเอกสาร HTML -->
